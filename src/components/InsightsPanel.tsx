@@ -64,12 +64,14 @@ export default function InsightsPanel() {
     }
 
     // Count notes
-    result.push({
-      label: 'notes',
-      value: notes.length,
-      icon: 'FileText',
-      color: 'blue',
-    });
+    if (notes.length > 0) {
+      result.push({
+        label: 'notes',
+        value: notes.length,
+        icon: 'FileText',
+        color: 'blue',
+      });
+    }
 
     // Calculate note density
     if (notes.length > 0 && startDate && endDate) {

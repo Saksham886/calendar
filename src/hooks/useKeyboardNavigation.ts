@@ -38,8 +38,14 @@ export function useKeyboardNavigation() {
         setStartDate(newDate);
       }
 
-      // Reset selection
+      // Reset selection (but not when typing in input/textarea)
       if ((e.key === 'Escape' || e.key === 'Backspace') && startDate) {
+        const isInputField = (e.target as HTMLElement)?.tagName === 'INPUT' ||
+                            (e.target as HTMLElement)?.tagName === 'TEXTAREA';
+        if (isInputField && e.key === 'Backspace') {
+          // Allow backspace in input fields
+          return;
+        }
         e.preventDefault();
         setStartDate(null);
         setEndDate(null);
