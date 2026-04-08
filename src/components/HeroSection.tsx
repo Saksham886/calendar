@@ -27,8 +27,8 @@ export default function HeroSection() {
         'relative overflow-hidden rounded-3xl mb-8 h-64 sm:h-80 lg:h-96 group',
         'backdrop-blur-xl border shadow-2xl',
         theme === 'dark'
-          ? 'bg-gradient-to-br from-slate-900/60 via-blue-900/40 to-indigo-900/40 border-slate-700/50 shadow-indigo-500/10'
-          : 'bg-gradient-to-br from-white/50 via-blue-100/40 to-indigo-100/40 border-white/70 shadow-indigo-500/20'
+          ? 'bg-gradient-to-br from-[#1E293B]/60 via-[#034DB3]/40 to-[#6366F1]/40 border-[#334155]/50 shadow-[#60A5FA]/10'
+          : 'bg-gradient-to-br from-[#FFFFFF]/50 via-[#DBEAFE]/40 to-[#E0E7FF]/40 border-[#E2E8F0]/70 shadow-[#3B82F6]/20'
       )}
     >
       {/* Hero image with parallax effect */}
@@ -57,8 +57,8 @@ export default function HeroSection() {
         className={cn(
           'absolute inset-0',
           theme === 'dark'
-            ? 'bg-gradient-to-br from-slate-900/50 via-blue-900/40 to-indigo-900/60'
-            : 'bg-gradient-to-br from-white/40 via-blue-50/40 to-indigo-100/50'
+            ? 'bg-gradient-to-br from-[#1E293B]/50 via-[#6366F1]/40 to-[#A78BFA]/60'
+            : 'bg-gradient-to-br from-[#FFFFFF]/40 via-[#DBEAFE]/40 to-[#E0E7FF]/50'
         )}
       />
 
@@ -68,15 +68,15 @@ export default function HeroSection() {
           'absolute top-0 left-0 right-0 h-8 backdrop-blur-md border-b',
           'flex items-center justify-center',
           theme === 'dark'
-            ? 'bg-slate-900/80 border-slate-700/50 shadow-lg shadow-black/20'
-            : 'bg-white/60 border-slate-200/50 shadow-lg shadow-black/5'
+            ? 'bg-[#1E293B]/80 border-[#334155]/50 shadow-lg shadow-black/20'
+            : 'bg-[#FFFFFF]/60 border-[#E2E8F0]/50 shadow-lg shadow-black/5'
         )}
       >
         <div className={cn(
           'w-full h-1 bg-gradient-to-r rounded-full',
           theme === 'dark'
-            ? 'from-amber-600/60 via-orange-500/40 to-amber-600/60'
-            : 'from-amber-700/60 via-orange-600/40 to-amber-700/60'
+            ? 'from-[#60A5FA]/60 via-[#A78BFA]/40 to-[#60A5FA]/60'
+            : 'from-[#3B82F6]/60 via-[#6366F1]/40 to-[#3B82F6]/60'
         )} />
       </motion.div>
 
@@ -92,8 +92,8 @@ export default function HeroSection() {
               'text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 bg-clip-text text-transparent',
               'bg-gradient-to-r drop-shadow-lg',
               theme === 'dark'
-                ? 'from-white via-blue-100 to-indigo-100'
-                : 'from-slate-900 via-blue-700 to-indigo-700'
+                ? 'from-[#E2E8F0] via-[#60A5FA] to-[#A78BFA]'
+                : 'from-[#0F172A] via-[#3B82F6] to-[#6366F1]'
             )}
           >
             Interactive Calendar
@@ -107,8 +107,8 @@ export default function HeroSection() {
           className={cn(
             'text-lg sm:text-xl font-light max-w-2xl',
             theme === 'dark'
-              ? 'text-slate-200'
-              : 'text-slate-700'
+              ? 'text-[#E2E8F0]'
+              : 'text-[#0F172A]'
           )}
         >
           Select dates, annotate events, and organize your time with elegance
@@ -119,8 +119,8 @@ export default function HeroSection() {
           className={cn(
             'mt-8 h-0.5 rounded-full',
             theme === 'dark'
-              ? 'bg-gradient-to-r from-transparent via-indigo-400 to-transparent'
-              : 'bg-gradient-to-r from-transparent via-indigo-500 to-transparent'
+              ? 'bg-gradient-to-r from-transparent via-[#60A5FA] to-transparent'
+              : 'bg-gradient-to-r from-transparent via-[#3B82F6] to-transparent'
           )}
           initial={{ width: 0 }}
           animate={{ width: 120 }}

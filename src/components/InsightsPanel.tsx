@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import useCalendarStore from '@/store/calendarStore';
 import { motion } from 'framer-motion';
+import { FileText, BarChart3, Calendar, Flame, TrendingUp } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 interface Insight {
@@ -11,6 +12,14 @@ interface Insight {
   icon: string;
   color: 'green' | 'blue' | 'purple' | 'yellow';
 }
+
+const iconMap: { [key: string]: React.ReactNode } = {
+  Calendar: <Calendar className="w-5 h-5" />,
+  Flame: <Flame className="w-5 h-5" />,
+  FileText: <FileText className="w-5 h-5" />,
+  BarChart3: <BarChart3 className="w-5 h-5" />,
+  TrendingUp: <TrendingUp className="w-5 h-5" />,
+};
 
 export default function InsightsPanel() {
   const { startDate, endDate, notes, theme } = useCalendarStore();
@@ -29,7 +38,7 @@ export default function InsightsPanel() {
       result.push({
         label: 'selected_days',
         value: daysDiff,
-        icon: '📅',
+        icon: 'Calendar',
         color: 'green',
       });
     }
@@ -49,7 +58,7 @@ export default function InsightsPanel() {
       result.push({
         label: 'longest_streak',
         value: maxStreak,
-        icon: '🔥',
+        icon: 'Flame',
         color: 'yellow',
       });
     }
@@ -58,7 +67,7 @@ export default function InsightsPanel() {
     result.push({
       label: 'notes',
       value: notes.length,
-      icon: '📝',
+      icon: 'FileText',
       color: 'blue',
     });
 
@@ -76,7 +85,7 @@ export default function InsightsPanel() {
       result.push({
         label: 'avg_note_length',
         value: avgCharsPerDay,
-        icon: '📊',
+        icon: 'BarChart3',
         color: 'purple',
       });
     }
@@ -86,20 +95,20 @@ export default function InsightsPanel() {
 
   const colorMap = {
     green: {
-      dark: 'from-emerald-500/30 to-emerald-600/20 border-emerald-500/40 text-emerald-300',
-      light: 'from-emerald-400/30 to-emerald-500/20 border-emerald-400/40 text-emerald-700',
+      dark: 'from-[#34D399]/30 to-[#10B981]/20 border-[#34D399]/40 text-[#34D399]',
+      light: 'from-[#22C55E]/30 to-[#16A34A]/20 border-[#22C55E]/40 text-[#15803D]',
     },
     blue: {
-      dark: 'from-blue-500/30 to-blue-600/20 border-blue-500/40 text-blue-300',
-      light: 'from-blue-400/30 to-blue-500/20 border-blue-400/40 text-blue-700',
+      dark: 'from-[#60A5FA]/30 to-[#3B82F6]/20 border-[#60A5FA]/40 text-[#60A5FA]',
+      light: 'from-[#3B82F6]/30 to-[#2563EB]/20 border-[#3B82F6]/40 text-[#1D4ED8]',
     },
     purple: {
-      dark: 'from-purple-500/30 to-purple-600/20 border-purple-500/40 text-purple-300',
-      light: 'from-purple-400/30 to-purple-500/20 border-purple-400/40 text-purple-700',
+      dark: 'from-[#A78BFA]/30 to-[#8B5CF6]/20 border-[#A78BFA]/40 text-[#C4B5FD]',
+      light: 'from-[#6366F1]/30 to-[#4F46E5]/20 border-[#6366F1]/40 text-[#312E81]',
     },
     yellow: {
-      dark: 'from-amber-500/30 to-amber-600/20 border-amber-500/40 text-amber-300',
-      light: 'from-amber-400/30 to-amber-500/20 border-amber-400/40 text-amber-700',
+      dark: 'from-[#FBBF24]/30 to-[#F59E0B]/20 border-[#FBBF24]/40 text-[#FCD34D]',
+      light: 'from-[#FBBF24]/30 to-[#F59E0B]/20 border-[#FBBF24]/40 text-[#92400E]',
     },
   };
 
@@ -111,15 +120,15 @@ export default function InsightsPanel() {
       className={cn(
         'rounded-2xl backdrop-blur-sm border p-6 space-y-4',
         theme === 'dark'
-          ? 'bg-slate-800/40 border-slate-700/50'
-          : 'bg-slate-100/40 border-slate-200/50'
+          ? 'bg-[#1E293B]/40 border-[#334155]/50'
+          : 'bg-[#F8FAFC]/40 border-[#E2E8F0]/50'
       )}
     >
       {/* Header as code comment */}
       <div
         className={cn(
           'text-sm font-mono mb-4',
-          theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+          theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
         )}
       >
         {'// insights'}
@@ -129,7 +138,7 @@ export default function InsightsPanel() {
         <div
           className={cn(
             'text-sm font-mono',
-            theme === 'dark' ? 'text-slate-500' : 'text-slate-600'
+            theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
           )}
         >
           {'// select a date range to view insights'}
@@ -159,7 +168,9 @@ export default function InsightsPanel() {
               <div className="text-xs font-mono opacity-80">
                 {insight.label.replace(/_/g, '_')}
               </div>
-              <div className="text-lg mt-2">{insight.icon}</div>
+              <div className="text-lg mt-2 text-xl">
+                {iconMap[insight.icon] || insight.icon}
+              </div>
             </motion.div>
           ))}
         </div>
@@ -171,8 +182,8 @@ export default function InsightsPanel() {
           className={cn(
             'text-xs font-mono mt-4 pt-4 border-t',
             theme === 'dark'
-              ? 'border-slate-700/50 text-slate-500'
-              : 'border-slate-200/50 text-slate-600'
+              ? 'border-[#334155]/50 text-[#94A3B8]'
+              : 'border-[#E2E8F0]/50 text-[#64748B]'
           )}
         >
           {'// powered by developer intelligence'}

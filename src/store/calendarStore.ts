@@ -1,7 +1,53 @@
 import { create } from 'zustand';
 import { CalendarState, Note, SelectionRange } from '@/types';
 
+let saveTimeout: NodeJS.Timeout | null = null;
+
+// Pre-calculate note dates for efficient lookups
+const getNoteIntensity = (date: Date, notes: Note[]): number => {
+  let intensity = 0;
+  for (const note of notes) {
+    if (!note.range.start || !note.range.end) continue;
+    const start = new Date(note.range.start);
+    const end = new Date(note.range.end);
+    if (date >= start && date <= end) {
+      intensity = Math.min(intensity + 1, 4);
+    }
+  }
+  return intensity;
+};
+
+const hasNotesOnDate = (date: Date, notes: Note[]): boolean => {
+  return notes.some(n =>
+    n.range.start &&
+    n.range.end &&
+    date >= new Date(n.range.start) &&
+    date <= new Date(n.range.end)
+  );
+};
+
+const getNotesForDate = (date: Date, notes: Note[]): Note[] => {
+  return notes.filter(n =>
+    n.range.start &&
+    n.range.end &&
+    date >= new Date(n.range.start) &&
+    date <= new Date(n.range.end)
+  );
+};
+
+let debouncedCallback: (() => void) | null = null;
+
+const debouncedSave = (callback: () => void) => {
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    callback();
+  }, 500);
+};
+
 interface CalendarStore extends CalendarState {
+  getNoteIntensity: (date: Date) => number;
+  hasNotesOnDate: (date: Date) => boolean;
+  getNotesForDate: (date: Date) => Note[];
   setCurrentMonth: (date: Date) => void;
   setStartDate: (date: Date | null) => void;
   setEndDate: (date: Date | null) => void;
@@ -30,6 +76,10 @@ const useCalendarStore = create<CalendarStore>((set, get) => ({
   theme: 'dark',
   showHeatmap: false,
   selectionRanges: [],
+
+  getNoteIntensity: (date: Date) => getNoteIntensity(date, get().notes),
+  hasNotesOnDate: (date: Date) => hasNotesOnDate(date, get().notes),
+  getNotesForDate: (date: Date) => getNotesForDate(date, get().notes),
 
   setCurrentMonth: (date: Date) =>
     set({ currentMonth: new Date(date) }),
@@ -68,7 +118,7 @@ const useCalendarStore = create<CalendarStore>((set, get) => ({
   addNote: (note: Note) => {
     const state = get();
     set({ notes: [...state.notes, note] });
-    get().saveToLocalStorage();
+    debouncedSave(() => get().saveToLocalStorage());
   },
 
   updateNote: (id: string, content: string) => {
@@ -79,38 +129,38 @@ const useCalendarStore = create<CalendarStore>((set, get) => ({
         : note
     );
     set({ notes: updatedNotes });
-    get().saveToLocalStorage();
+    debouncedSave(() => get().saveToLocalStorage());
   },
 
   deleteNote: (id: string) => {
     const state = get();
     set({ notes: state.notes.filter(note => note.id !== id) });
-    get().saveToLocalStorage();
+    debouncedSave(() => get().saveToLocalStorage());
   },
 
   toggleTheme: () => {
     const state = get();
     const newTheme = state.theme === 'dark' ? 'light' : 'dark';
     set({ theme: newTheme });
-    get().saveToLocalStorage();
+    debouncedSave(() => get().saveToLocalStorage());
   },
 
   toggleHeatmap: () => {
     const state = get();
     set({ showHeatmap: !state.showHeatmap });
-    get().saveToLocalStorage();
+    debouncedSave(() => get().saveToLocalStorage());
   },
 
   addSelectionRange: (range: SelectionRange) => {
     const state = get();
     set({ selectionRanges: [...state.selectionRanges, range] });
-    get().saveToLocalStorage();
+    debouncedSave(() => get().saveToLocalStorage());
   },
 
   removeSelectionRange: (id: string) => {
     const state = get();
     set({ selectionRanges: state.selectionRanges.filter(r => r.id !== id) });
-    get().saveToLocalStorage();
+    debouncedSave(() => get().saveToLocalStorage());
   },
 
   loadFromLocalStorage: () => {

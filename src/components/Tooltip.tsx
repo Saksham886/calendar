@@ -26,8 +26,8 @@ export default function Tooltip({ isVisible, content, position = 'top' }: Toolti
             position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
             'left-1/2 -translate-x-1/2',
             theme === 'dark'
-              ? 'bg-slate-800/95 border-slate-600/60 text-slate-100 shadow-blue-500/20'
-              : 'bg-slate-100/95 border-slate-300/60 text-slate-900 shadow-blue-400/20'
+              ? 'bg-[#1E293B]/95 border-[#334155]/60 text-[#E2E8F0] shadow-[#60A5FA]/20'
+              : 'bg-[#F8FAFC]/95 border-[#E2E8F0]/60 text-[#0F172A] shadow-[#3B82F6]/20'
           )}
         >
           {content}
@@ -40,13 +40,13 @@ export default function Tooltip({ isVisible, content, position = 'top' }: Toolti
                 ? 'top-full border-r border-b'
                 : 'bottom-full border-l border-t',
               theme === 'dark'
-                ? 'border-slate-700'
-                : 'border-slate-300'
+                ? 'border-[#334155]'
+                : 'border-[#E2E8F0]'
             )}
             style={{
               width: '6px',
               height: '6px',
-              backgroundColor: theme === 'dark' ? '#1e293b' : '#f1f5f9',
+              backgroundColor: theme === 'dark' ? '#1E293B' : '#F8FAFC',
             }}
           />
         </motion.div>

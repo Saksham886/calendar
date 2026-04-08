@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import useCalendarStore from '@/store/calendarStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Plus, Edit2, Download, Lock } from 'lucide-react';
+import { Trash2, Plus, Edit2, Download, Lock, FileText, BarChart3, Code } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { formatDateRange } from '@/utils/dateUtils';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,6 +21,20 @@ export default function NotesPanel() {
     deleteNote,
   } = useCalendarStore();
 
+  // Map format types to their icons
+  const getFormatIcon = (format: string) => {
+    switch (format) {
+      case 'JSON':
+        return <Code className="w-3 h-3" />;
+      case 'CSV':
+        return <BarChart3 className="w-3 h-3" />;
+      case 'Markdown':
+        return <FileText className="w-3 h-3" />;
+      default:
+        return <Download className="w-3 h-3" />;
+    }
+  };
+
   const [noteContent, setNoteContent] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
@@ -30,13 +44,17 @@ export default function NotesPanel() {
 
   const notesForSelection = useMemo(() => {
     if (!startDate || !endDate) return [];
-    return notes.filter(
-      n =>
-        n.range.start &&
-        n.range.end &&
-        n.range.start.getTime() === startDate.getTime() &&
-        n.range.end.getTime() === endDate.getTime()
-    );
+    // Show notes that overlap with the current selection
+    return notes.filter(n => {
+      if (!n.range.start || !n.range.end) return false;
+      // Check if note range overlaps with current selection
+      // Overlap exists when: noteStart <= selectionEnd AND noteEnd >= selectionStart
+      const noteStart = n.range.start.getTime();
+      const noteEnd = n.range.end.getTime();
+      const selStart = startDate.getTime();
+      const selEnd = endDate.getTime();
+      return noteStart <= selEnd && noteEnd >= selStart;
+    });
   }, [notes, startDate, endDate]);
 
   const handleAddNote = useCallback(() => {
@@ -86,8 +104,8 @@ export default function NotesPanel() {
       className={cn(
         'rounded-3xl backdrop-blur-xl border shadow-2xl overflow-hidden h-full flex flex-col relative group',
         theme === 'dark'
-          ? 'bg-gradient-to-br from-slate-900/40 via-slate-800/30 to-purple-900/30 border-slate-700/50 shadow-purple-500/10'
-          : 'bg-gradient-to-br from-white/50 via-slate-50/40 to-purple-50/30 border-white/70 shadow-purple-500/20'
+          ? 'bg-gradient-to-br from-[#1E293B]/40 via-[#0F172A]/30 to-[#1E293B]/30 border-[#334155]/50 shadow-[#60A5FA]/10'
+          : 'bg-gradient-to-br from-[#FFFFFF]/50 via-[#F8FAFC]/40 to-[#E0E7FF]/30 border-[#E2E8F0]/70 shadow-[#3B82F6]/20'
       )}
     >
       {/* Premium glass gradient overlay */}
@@ -106,7 +124,7 @@ export default function NotesPanel() {
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <h2 className={cn('text-2xl font-bold mb-2 font-mono', theme === 'dark' ? 'text-cyan-400' : 'text-cyan-700')} style={{ textShadow: theme === 'dark' ? '0 0 10px rgba(34, 211, 238, 0.2)' : 'none' }}>
+          <h2 className={cn('text-2xl font-bold mb-2 font-mono', theme === 'dark' ? 'text-[#60A5FA]' : 'text-[#3B82F6]')} style={{ textShadow: theme === 'dark' ? '0 0 10px rgba(96, 165, 250, 0.2)' : 'none' }}>
             {`// notes`}
           </h2>
           {canAddNote && (
@@ -117,8 +135,8 @@ export default function NotesPanel() {
               className={cn(
                 'inline-block px-3 py-1 rounded-full backdrop-blur-sm text-xs font-mono font-medium',
                 theme === 'dark'
-                  ? 'bg-cyan-500/20 border border-cyan-400/30 text-cyan-200'
-                  : 'bg-cyan-400/20 border border-cyan-300/30 text-cyan-700'
+                  ? 'bg-[#60A5FA]/20 border border-[#60A5FA]/30 text-[#60A5FA]'
+                  : 'bg-[#3B82F6]/20 border border-[#3B82F6]/30 text-[#3B82F6]'
               )}
             >
               {`[${formatDateRange(startDate, endDate)}]`}
@@ -138,24 +156,22 @@ export default function NotesPanel() {
             <div className="space-y-2">
               <p className={cn(
                 'text-xs font-semibold uppercase tracking-wider',
-                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
               )}>
                 Color
               </p>
               <div className="flex gap-2 flex-wrap">
                 {NOTE_COLORS.map(color => (
-                  <motion.button
+                  <button
                     key={color}
-                    whileHover={{ scale: 1.3, rotate: 5 }}
-                    whileTap={{ scale: 0.85 }}
                     onClick={() => setSelectedColor(color)}
                     style={{ backgroundColor: color }}
                     className={cn(
-                      'w-7 h-7 rounded-full transition-all shadow-lg',
+                      'w-7 h-7 rounded-full transition-all shadow-lg hover:scale-125 hover:rotate-5 active:scale-85',
                       selectedColor === color
-                        ? 'ring-2 ring-offset-2 ring-white scale-110'
+                        ? 'ring-2 ring-offset-2 ring-[#E2E8F0] scale-110'
                         : 'opacity-60 hover:opacity-100',
-                      theme === 'dark' ? 'ring-offset-slate-900' : 'ring-offset-white'
+                      theme === 'dark' ? 'ring-offset-[#0F172A]' : 'ring-offset-[#F8FAFC]'
                     )}
                   />
                 ))}
@@ -172,30 +188,31 @@ export default function NotesPanel() {
                   'w-full px-4 py-3 rounded-xl text-sm border backdrop-blur-sm resize-none focus:outline-none focus:ring-2 transition-all',
                   'placeholder-opacity-60',
                   theme === 'dark'
-                    ? 'bg-slate-800/50 border-slate-700/50 text-white placeholder-slate-400 focus:ring-indigo-500 focus:border-indigo-500'
-                    : 'bg-white/60 border-slate-200/50 text-slate-900 placeholder-slate-500 focus:ring-indigo-400 focus:border-indigo-400'
+                    ? 'bg-[#0F172A]/50 border-[#334155]/50 text-[#E2E8F0] placeholder-[#94A3B8] focus:ring-[#60A5FA] focus:border-[#60A5FA]'
+                    : 'bg-[#FFFFFF]/60 border-[#E2E8F0]/50 text-[#0F172A] placeholder-[#64748B] focus:ring-[#3B82F6] focus:border-[#3B82F6]'
                 )}
                 rows={3}
               />
-              <motion.button
-                whileHover={{ scale: noteContent.trim() ? 1.05 : 1 }}
-                whileTap={{ scale: noteContent.trim() ? 0.95 : 1 }}
+              <button
                 onClick={handleAddNote}
                 disabled={!noteContent.trim()}
                 className={cn(
                   'w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-lg',
+                  'hover:scale-105 active:scale-95',
                   noteContent.trim()
                     ? theme === 'dark'
-                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white cursor-pointer'
-                      : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white cursor-pointer'
+                      ? 'bg-gradient-to-r from-[#60A5FA] to-[#3B82F6] hover:from-[#60A5FA] hover:to-[#2563EB] text-white cursor-pointer'
+                      : 'bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#2563EB] hover:to-[#1D4ED8] text-white cursor-pointer'
                     : theme === 'dark'
-                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      ? 'bg-[#334155] text-[#94A3B8] cursor-not-allowed hover:scale-100 active:scale-100'
+                      : 'bg-[#E2E8F0] text-[#94A3B8] cursor-not-allowed hover:scale-100 active:scale-100'
+                  ,
+                  !noteContent.trim() && 'pointer-events-none'
                 )}
               >
                 <Plus className="w-4 h-4" />
                 Add Note
-              </motion.button>
+              </button>
             </div>
           </motion.div>
         )}
@@ -207,8 +224,8 @@ export default function NotesPanel() {
             className={cn(
               'flex-1 flex items-center justify-center py-12 rounded-xl backdrop-blur-sm border-2 border-dashed',
               theme === 'dark'
-                ? 'bg-slate-800/30 border-slate-700/50 text-slate-400'
-                : 'bg-slate-100/50 border-slate-300/50 text-slate-600'
+                ? 'bg-[#0F172A]/30 border-[#334155]/50 text-[#94A3B8]'
+                : 'bg-[#F8FAFC]/50 border-[#E2E8F0]/50 text-[#64748B]'
             )}
           >
             <div className="text-center">
@@ -231,8 +248,8 @@ export default function NotesPanel() {
                   className={cn(
                     'py-8 rounded-xl backdrop-blur-sm border-2 border-dashed',
                     theme === 'dark'
-                      ? 'bg-slate-800/20 border-slate-700/30'
-                      : 'bg-slate-100/30 border-slate-300/30'
+                      ? 'bg-[#0F172A]/20 border-[#334155]/30'
+                      : 'bg-[#F8FAFC]/30 border-[#E2E8F0]/30'
                   )}
                 >
                   <motion.div
@@ -242,24 +259,24 @@ export default function NotesPanel() {
                     className={cn(
                       'px-4 py-3 rounded-lg font-mono text-xs leading-relaxed',
                       theme === 'dark'
-                        ? 'bg-slate-900/40 border border-slate-700/40 text-slate-300'
-                        : 'bg-slate-200/30 border border-slate-300/40 text-slate-700'
+                        ? 'bg-[#1E293B]/40 border border-[#334155]/40 text-[#E2E8F0]'
+                        : 'bg-[#E0E7FF]/30 border border-[#E2E8F0]/40 text-[#0F172A]'
                     )}
                   >
-                    <div className={theme === 'dark' ? 'text-green-400' : 'text-green-700'}>
+                    <div className={theme === 'dark' ? 'text-[#34D399]' : 'text-[#22C55E]'}>
                       {`// Example: Sprint Planning`}
                     </div>
                     <div className="mt-2 space-y-1">
-                      <div className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
+                      <div className={theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'}>
                         {`const sprint = {`}
                       </div>
-                      <div className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
+                      <div className={theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'}>
                         {`  title: "Build new dashboard",`}
                       </div>
-                      <div className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
+                      <div className={theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'}>
                         {`  status: "in-progress"`}
                       </div>
-                      <div className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
+                      <div className={theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'}>
                         {`}`}
                       </div>
                     </div>
@@ -270,7 +287,7 @@ export default function NotesPanel() {
                     transition={{ delay: 0.2 }}
                     className={cn(
                       'text-center text-xs mt-4 font-medium',
-                      theme === 'dark' ? 'text-slate-500' : 'text-slate-600'
+                      theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
                     )}
                   >
                     Add a note to get started
@@ -286,10 +303,10 @@ export default function NotesPanel() {
                     transition={{ delay: index * 0.05 }}
                     className={cn(
                       'p-4 rounded-xl backdrop-blur-sm border-l-4 border-r border-t border-b transition-all group relative',
-                      'hover:shadow-lg hover:shadow-indigo-500/10',
+                      'hover:shadow-lg hover:shadow-[#3B82F6]/10',
                       theme === 'dark'
-                        ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-800'
-                        : 'bg-white/60 border-slate-200/50 hover:bg-white'
+                        ? 'bg-[#1E293B]/50 border-[#334155]/50 hover:bg-[#1E293B]'
+                        : 'bg-[#FFFFFF]/60 border-[#E2E8F0]/50 hover:bg-[#FFFFFF]'
                     )}
                     style={{ borderLeftColor: note.color }}
                   >
@@ -301,80 +318,76 @@ export default function NotesPanel() {
                           className={cn(
                             'w-full px-3 py-2 rounded-lg text-sm border backdrop-blur-sm resize-none focus:outline-none focus:ring-2 transition-all',
                             theme === 'dark'
-                              ? 'bg-slate-700/50 border-slate-600 text-white focus:ring-indigo-500'
-                              : 'bg-slate-100/60 border-slate-300 text-slate-900 focus:ring-indigo-400'
+                              ? 'bg-[#0F172A]/50 border-[#334155] text-[#E2E8F0] focus:ring-[#60A5FA]'
+                              : 'bg-[#F8FAFC]/60 border-[#E2E8F0] text-[#0F172A] focus:ring-[#3B82F6]'
                           )}
                           rows={2}
                         />
                         <div className="flex gap-2">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                          <button
                             onClick={() => handleUpdateNote(note.id)}
                             className={cn(
                               'flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all',
+                              'hover:scale-105 active:scale-95',
                               theme === 'dark'
-                                ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                                : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                                ? 'bg-[#60A5FA] hover:bg-[#3B82F6] text-white'
+                                : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white'
                             )}
                           >
                             Save
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                          </button>
+                          <button
                             onClick={() => {
                               setEditingId(null);
                               setEditContent('');
                             }}
                             className={cn(
                               'flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all',
+                              'hover:scale-105 active:scale-95',
                               theme === 'dark'
-                                ? 'bg-slate-700 hover:bg-slate-600 text-slate-200'
-                                : 'bg-slate-200 hover:bg-slate-300 text-slate-900'
+                                ? 'bg-[#334155] hover:bg-[#475569] text-[#E2E8F0]'
+                                : 'bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#0F172A]'
                             )}
                           >
                             Cancel
-                          </motion.button>
+                          </button>
                         </div>
                       </div>
                     ) : (
                       <div className="flex items-start justify-between gap-3">
                         <p className={cn(
                           'text-sm flex-1 leading-relaxed font-medium font-mono',
-                          theme === 'dark' ? 'text-slate-200' : 'text-slate-800'
+                          theme === 'dark' ? 'text-[#E2E8F0]' : 'text-[#0F172A]'
                         )}>
                           {note.content}
                         </p>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <motion.button
-                            whileHover={{ scale: 1.15, rotate: 5 }}
-                            whileTap={{ scale: 0.85 }}
+                          <button
                             onClick={() => startEditNote(note.id, note.content)}
                             className={cn(
                               'p-1.5 rounded-lg transition-all',
+                              'hover:scale-115 hover:rotate-5 active:scale-85',
                               theme === 'dark'
-                                ? 'hover:bg-slate-700 text-slate-400 hover:text-indigo-400'
-                                : 'hover:bg-slate-300 text-slate-600 hover:text-indigo-600'
+                                ? 'hover:bg-[#334155] text-[#94A3B8] hover:text-[#60A5FA]'
+                                : 'hover:bg-[#E0E7FF] text-[#64748B] hover:text-[#3B82F6]'
                             )}
                             title="Edit note"
                           >
                             <Edit2 className="w-4 h-4" />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.15, rotate: -5 }}
-                            whileTap={{ scale: 0.85 }}
+                          </button>
+                          <button
                             onClick={() => handleDeleteNote(note.id)}
                             className={cn(
                               'p-1.5 rounded-lg transition-all',
+                              'hover:scale-115 hover:-rotate-5 active:scale-85',
                               theme === 'dark'
-                                ? 'hover:bg-red-900/50 text-red-400 hover:text-red-300'
-                                : 'hover:bg-red-200 text-red-600 hover:text-red-700'
+                                ? 'hover:bg-[#7F1D1D] text-[#FCA5A5] hover:text-[#FEE2E2]'
+                                : 'hover:bg-[#FEE2E2] text-[#DC2626] hover:text-[#991B1B]'
                             )}
                             title="Delete note"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </motion.button>
+                          </button>
                         </div>
                       </div>
                     )}
@@ -393,36 +406,35 @@ export default function NotesPanel() {
             transition={{ delay: 0.2 }}
             className={cn(
               'mt-6 pt-6 border-t space-y-3',
-              theme === 'dark' ? 'border-slate-700/50' : 'border-slate-200/50'
+                theme === 'dark' ? 'border-[#334155]/50' : 'border-[#E2E8F0]/50'
             )}
           >
             <p className={cn(
               'text-xs font-bold uppercase tracking-wider',
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+              theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
             )}>
               📥 Export All Notes
             </p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { format: 'JSON', onClick: () => downloadNotesAsJSON(notes), icon: '{}' },
-                { format: 'CSV', onClick: () => downloadNotesAsCSV(notes), icon: '📊' },
-                { format: 'Markdown', onClick: () => downloadNotesAsMarkdown(notes), icon: '📝' },
+                { format: 'JSON', onClick: () => downloadNotesAsJSON(notes), icon: 'JSON' },
+                { format: 'CSV', onClick: () => downloadNotesAsCSV(notes), icon: 'BarChart3' },
+                { format: 'Markdown', onClick: () => downloadNotesAsMarkdown(notes), icon: 'FileText' },
               ].map(btn => (
-                <motion.button
+                <button
                   key={btn.format}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={btn.onClick}
                   className={cn(
                     'px-2 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all',
+                    'hover:scale-105 hover:-translate-y-0.5 active:scale-95',
                     theme === 'dark'
-                      ? 'bg-slate-800/60 hover:bg-slate-700 text-slate-200 hover:shadow-lg hover:shadow-slate-900'
-                      : 'bg-slate-200/60 hover:bg-slate-300 text-slate-900 hover:shadow-lg hover:shadow-slate-400'
+                      ? 'bg-[#1E293B]/60 hover:bg-[#0F172A] text-[#E2E8F0] hover:shadow-lg hover:shadow-[#0F172A]'
+                      : 'bg-[#F8FAFC]/60 hover:bg-[#E0E7FF] text-[#0F172A] hover:shadow-lg hover:shadow-[#E2E8F0]'
                   )}
                 >
-                  <Download className="w-3 h-3" />
+                  {getFormatIcon(btn.format)}
                   {btn.format}
-                </motion.button>
+                </button>
               ))}
             </div>
           </motion.div>

@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, memo, useState } from 'react';
+import { useCallback, memo, useState, useMemo } from 'react';
 import useCalendarStore from '@/store/calendarStore';
 import { motion } from 'framer-motion';
 import { isSameDay, isSameMonth, isToday, format, formatDistanceToNow } from 'date-fns';
+import { FileText, Gift } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import {
   isDateInRange,
@@ -13,6 +14,7 @@ import {
 } from '@/utils/dateUtils';
 import { HOLIDAYS_US } from '@/constants';
 import Tooltip from './Tooltip';
+import HeatmapCell from './HeatmapCell';
 
 interface DayCellProps {
   date: Date;
@@ -33,7 +35,8 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
     selectDateRange,
     setHoverDate,
     setIsDragging,
-    notes,
+    hasNotesOnDate,
+    getNotesForDate,
   } = useCalendarStore();
 
   const [showTooltip, setShowTooltip] = useState(false);
@@ -44,12 +47,7 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
   const isStart = isDateRangeStart(date, startDate, endDate);
   const isEnd = isDateRangeEnd(date, startDate, endDate);
   const holiday = isDateHoliday(date, HOLIDAYS_US);
-  const hasNotes = notes.some(
-    n =>
-      n.range.start &&
-      n.range.end &&
-      isDateInRange(date, n.range.start, n.range.end)
-  );
+  const hasNotes = useMemo(() => hasNotesOnDate(date), [date, hasNotesOnDate]);
 
   const handleClick = useCallback(() => {
     if (isDragging) return;
@@ -90,33 +88,32 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
   const relativeDate = isTodayDate ? 'Today' : formatDistanceToNow(date, { addSuffix: true });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.01 }}
+    <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onClick={handleClick}
-      whileHover={isCurrentMonth ? { scale: 1.12, y: -4 } : {}}
       className={cn(
-        'relative aspect-square rounded-xl p-1 sm:p-2 cursor-pointer transition-all duration-200',
+        'relative aspect-square rounded-xl p-1 sm:p-2 cursor-pointer transition-all duration-200 hover:scale-105',
         'backdrop-blur-md group',
         !isCurrentMonth && 'opacity-40 cursor-default',
-        // Hover glow effect - developer style
+        // Hover glow effect
         isCurrentMonth && theme === 'dark'
-          ? 'hover:bg-slate-700/50 hover:shadow-2xl hover:shadow-blue-500/30 hover:border-blue-500/50'
-          : 'hover:bg-slate-200/70 hover:shadow-2xl hover:shadow-blue-400/40 hover:border-blue-400/50',
-        isCurrentMonth && 'border border-slate-600/30 hover:border-blue-500/50',
-        // Today styling with enhanced visual
+          ? 'hover:bg-[#1E293B]/50 hover:shadow-2xl hover:shadow-[#60A5FA]/30 hover:border-[#60A5FA]/50'
+          : 'hover:bg-[#F0F4F8]/70 hover:shadow-2xl hover:shadow-[#3B82F6]/40 hover:border-[#3B82F6]/50',
+        isCurrentMonth && 'border border-[#334155]/30 dark:border-[#334155]/30 hover:border-[#60A5FA]/50',
+        // Today styling
         isTodayDate && !isInRange && !isHoveredInRange && theme === 'dark'
-          ? 'bg-gradient-to-br from-green-500/25 to-emerald-500/15 border border-green-500/60 shadow-lg shadow-green-500/20'
+          ? 'bg-gradient-to-br from-[#34D399]/25 to-[#10B981]/15 border border-[#34D399]/60 shadow-lg shadow-[#34D399]/20'
           : isTodayDate && !isInRange && !isHoveredInRange && theme === 'light'
-            ? 'bg-gradient-to-br from-green-400/25 to-emerald-400/15 border border-green-500/60 shadow-lg shadow-green-500/20'
+            ? 'bg-gradient-to-br from-[#22C55E]/25 to-[#16A34A]/15 border border-[#22C55E]/60 shadow-lg shadow-[#22C55E]/20'
             : ''
       )}
     >
+      {/* Heatmap intensity overlay */}
+      <HeatmapCell date={date} currentMonth={currentMonth} />
+
       {/* Tooltip on hover */}
       <div className="relative">
         <Tooltip
@@ -125,7 +122,18 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
             <div className="text-center">
               <div>{dateLabel}</div>
               <div className="text-opacity-70 text-xs">{relativeDate}</div>
-              {hasNotes && <div className="text-xs mt-1">📝 Has notes</div>}
+              {hasNotes && (
+                <div className="text-xs mt-2 max-w-xs">
+                  {getNotesForDate(date).slice(0, 2).map((note, i) => (
+                    <div key={note.id} className="text-xs opacity-90 truncate flex items-center gap-1">
+                      <FileText className="w-3 h-3 flex-shrink-0" /> {note.content}
+                    </div>
+                  ))}
+                  {getNotesForDate(date).length > 2 && (
+                    <div className="text-xs opacity-70">+{getNotesForDate(date).length - 2} more</div>
+                  )}
+                </div>
+              )}
             </div>
           }
           position="top"
@@ -139,10 +147,10 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
           className={cn(
             'absolute inset-0 rounded-xl -z-10 backdrop-blur-sm',
             theme === 'dark'
-              ? 'bg-gradient-to-r from-indigo-500/40 via-blue-500/35 to-indigo-500/40'
-              : 'bg-gradient-to-r from-indigo-400/35 via-blue-400/30 to-indigo-400/35',
-            isEdge && theme === 'dark' && 'shadow-lg shadow-indigo-500/40',
-            isEdge && theme === 'light' && 'shadow-lg shadow-indigo-400/30'
+              ? 'bg-gradient-to-r from-[#60A5FA]/40 via-[#60A5FA]/35 to-[#60A5FA]/40'
+              : 'bg-gradient-to-r from-[#3B82F6]/35 via-[#3B82F6]/30 to-[#3B82F6]/35',
+            isEdge && theme === 'dark' && 'shadow-lg shadow-[#60A5FA]/40',
+            isEdge && theme === 'light' && 'shadow-lg shadow-[#3B82F6]/30'
           )}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -152,44 +160,35 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
       )}
 
       {/* Date number with enhanced styling */}
-      <motion.div
-        whileHover={isCurrentMonth ? { scale: 1.2 } : {}}
+      <div
         className={cn(
-          'relative z-10 text-xs sm:text-sm font-bold mb-1',
+          'relative z-10 text-xs sm:text-sm font-bold mb-1 hover:scale-105 transition-transform',
           isCurrentMonth && theme === 'dark'
-            ? 'text-slate-100'
+            ? 'text-[#E2E8F0]'
             : isCurrentMonth && theme === 'light'
-              ? 'text-slate-900'
+              ? 'text-[#0F172A]'
               : theme === 'dark'
-                ? 'text-slate-600'
-                : 'text-slate-400',
+                ? 'text-[#64748B]'
+                : 'text-[#CBD5E1]',
           isEdge && theme === 'dark' && 'text-white',
-          isEdge && theme === 'light' && 'text-indigo-700',
+          isEdge && theme === 'light' && 'text-[#3B82F6]',
           isInRange && isCurrentMonth && theme === 'dark' && 'text-white',
-          isInRange && isCurrentMonth && theme === 'light' && 'text-indigo-700'
+          isInRange && isCurrentMonth && theme === 'light' && 'text-[#3B82F6]'
         )}
       >
         {format(date, 'd')}
-      </motion.div>
+      </div>
 
-      {/* Start/End date indicators with glow */}
+      {/* Start/End date indicators */}
       {isEdge && (
-        <motion.div
-          layoutId={isStart ? 'startDate' : 'endDate'}
+        <div
           className={cn(
             'absolute top-1 right-1 w-2 h-2 rounded-full ring-2 ring-offset-1',
             theme === 'dark'
-              ? 'bg-gradient-to-r from-indigo-400 to-blue-400 ring-indigo-300'
-              : 'bg-gradient-to-r from-indigo-600 to-blue-600 ring-indigo-400',
+              ? 'bg-gradient-to-r from-[#60A5FA] to-[#3B82F6] ring-[#60A5FA]'
+              : 'bg-gradient-to-r from-[#3B82F6] to-[#2563EB] ring-[#3B82F6]',
             'shadow-lg'
           )}
-          animate={{
-            boxShadow: [
-              'inset 0 0 0 0 rgba(99, 102, 241, 0.8)',
-              'inset 0 0 0 8px rgba(99, 102, 241, 0)',
-            ],
-          }}
-          transition={{ duration: 2, repeat: Infinity }}
         />
       )}
 
@@ -197,36 +196,32 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
       {holiday && (
         <div
           className={cn(
-            'text-xs font-bold mt-0.5',
+            'text-xs font-bold mt-0.5 flex justify-center',
             theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
           )}
           title={holiday}
         >
-          🎉
+          <Gift className="w-4 h-4" />
         </div>
       )}
 
-      {/* Notes indicator with enhanced dot */}
+      {/* Notes indicator */}
       {hasNotes && (
-        <motion.div
+        <div
           className={cn(
             'absolute bottom-1 right-1 w-2 h-2 rounded-full',
-            theme === 'dark' ? 'bg-cyan-400 shadow-lg shadow-cyan-400/50' : 'bg-cyan-500 shadow-lg shadow-cyan-500/40'
+            theme === 'dark' ? 'bg-[#60A5FA] shadow-lg shadow-[#60A5FA]/50' : 'bg-[#3B82F6] shadow-lg shadow-[#3B82F6]/40'
           )}
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
         />
       )}
 
       {/* Today indicator */}
       {isTodayDate && (
-        <motion.div
+        <div
           className={cn(
             'absolute bottom-1 left-1 w-1.5 h-1.5 rounded-full',
-            theme === 'dark' ? 'bg-green-400 shadow-lg shadow-green-400/50' : 'bg-green-500 shadow-lg shadow-green-500/40'
+            theme === 'dark' ? 'bg-[#34D399] shadow-lg shadow-[#34D399]/50' : 'bg-[#22C55E] shadow-lg shadow-[#22C55E]/40'
           )}
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
         />
       )}
 
@@ -236,8 +231,8 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
           className={cn(
             'absolute inset-0 rounded-xl border-2 pointer-events-none backdrop-blur-sm',
             theme === 'dark'
-              ? 'border-indigo-400/90 shadow-[inset_0_1px_3px_rgba(139,92,246,0.3)]'
-              : 'border-indigo-500/90 shadow-[inset_0_1px_3px_rgba(79,70,229,0.3)]'
+              ? 'border-[#60A5FA]/90 shadow-[inset_0_1px_3px_rgba(96,165,250,0.3)]'
+              : 'border-[#3B82F6]/90 shadow-[inset_0_1px_3px_rgba(59,130,246,0.3)]'
           )}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -246,14 +241,14 @@ const DayCell = memo(function DayCell({ date, currentMonth, index }: DayCellProp
       )}
 
       {/* Subtle hover glow */}
-      <motion.div
+      <div
         className={cn(
           'absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none',
-          'bg-gradient-to-br from-white/10 to-white/0'
+          'bg-gradient-to-br from-white/10 to-white/0',
+          'transition-opacity duration-300'
         )}
-        transition={{ duration: 0.3 }}
       />
-    </motion.div>
+    </div>
   );
 }, (prevProps, nextProps) => {
   // Custom comparison: only re-render if critical props change

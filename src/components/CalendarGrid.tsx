@@ -19,37 +19,27 @@ const CalendarGrid = memo(function CalendarGrid() {
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-2 mb-4">
         {WEEKDAYS.map(day => (
-          <motion.div
+          <div
             key={day}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.05 }}
             className={cn(
               'text-center text-xs sm:text-sm font-bold font-mono py-2 rounded-lg backdrop-blur-sm border',
               theme === 'dark'
-                ? 'text-slate-300 bg-slate-800/30 border-slate-700/50 hover:border-blue-500/40 hover:text-blue-300'
-                : 'text-slate-700 bg-slate-200/30 border-slate-300/50 hover:border-blue-400/40 hover:text-blue-700',
+                ? 'text-[#E2E8F0] bg-[#1E293B]/30 border-[#334155]/50 hover:border-[#60A5FA]/40 hover:text-[#60A5FA]'
+                : 'text-[#0F172A] bg-[#F8FAFC]/30 border-[#E2E8F0]/50 hover:border-[#3B82F6]/40 hover:text-[#3B82F6]',
               'transition-all duration-200'
             )}
           >
             {day}
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Calendar grid */}
-      <motion.div
-        layout
-        className="space-y-2"
-      >
+      <div className="space-y-2">
         {weeks.map((week, weekIndex) => (
-          <motion.div
+          <div
             key={`week-${weekIndex}`}
-            layout
             className="grid grid-cols-7 gap-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: weekIndex * 0.05 }}
           >
             {week.map((date, dayIndex) => (
               <DayCell
@@ -59,9 +49,9 @@ const CalendarGrid = memo(function CalendarGrid() {
                 index={weekIndex * 7 + dayIndex}
               />
             ))}
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 });

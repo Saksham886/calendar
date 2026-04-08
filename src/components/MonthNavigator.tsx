@@ -39,41 +39,38 @@ export default function MonthNavigator() {
         'flex items-center justify-between px-4 sm:px-6 py-4 rounded-2xl backdrop-blur-xl border shadow-lg',
         'group transition-all font-mono',
         theme === 'dark'
-          ? 'bg-gradient-to-r from-slate-900/60 to-slate-800/50 border-slate-700/60 hover:shadow-blue-500/15'
-          : 'bg-gradient-to-r from-white/60 to-slate-50/50 border-slate-300/60 hover:shadow-blue-400/15'
+          ? 'bg-gradient-to-r from-[#1E293B]/60 to-[#0F172A]/50 border-[#334155]/60 hover:shadow-[#60A5FA]/15'
+          : 'bg-gradient-to-r from-[#FFFFFF]/60 to-[#F8FAFC]/50 border-[#E2E8F0]/60 hover:shadow-[#3B82F6]/15'
       )}
     >
       {/* Previous month button */}
-      <motion.button
-        whileHover={{ scale: 1.15, x: -2 }}
-        whileTap={{ scale: 0.85 }}
+      <button
         onClick={handlePrevMonth}
         title="Previous month (← or swipe)"
         className={cn(
-          'p-2.5 rounded-lg transition-all font-bold text-lg',
+          'p-2.5 rounded-lg transition-all font-bold text-lg hover:scale-105 active:scale-95',
           theme === 'dark'
-            ? 'hover:bg-blue-600/40 text-blue-400 hover:text-blue-300 border border-transparent hover:border-blue-500/40'
-            : 'hover:bg-blue-500/40 text-blue-600 hover:text-blue-700 border border-transparent hover:border-blue-500/40'
+            ? 'hover:bg-[#60A5FA]/40 text-[#60A5FA] hover:text-[#A78BFA] border border-transparent hover:border-[#60A5FA]/40'
+            : 'hover:bg-[#3B82F6]/40 text-[#3B82F6] hover:text-[#6366F1] border border-transparent hover:border-[#3B82F6]/40'
         )}
       >
         &lt;
-      </motion.button>
+      </button>
 
       {/* Month/Year display as code */}
       <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-center">
         <motion.div
           key={getMonthYear(currentMonth)}
-          initial={{ opacity: 0, rotateY: -90 }}
-          animate={{ opacity: 1, rotateY: 0 }}
-          exit={{ opacity: 0, rotateY: 90 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          style={{ perspective: '1000px' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
           className="flex items-center gap-2"
         >
           <span
             className={cn(
               'text-xs font-mono font-light',
-              theme === 'dark' ? 'text-slate-500' : 'text-slate-600'
+              theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
             )}
           >
             {'const month ='}
@@ -81,10 +78,10 @@ export default function MonthNavigator() {
           <motion.h2
             className={cn(
               'text-lg sm:text-xl font-bold font-mono tracking-tight',
-              theme === 'dark' ? 'text-green-400' : 'text-green-700'
+              theme === 'dark' ? 'text-[#60A5FA]' : 'text-[#3B82F6]'
             )}
             style={{
-              textShadow: theme === 'dark' ? '0 0 10px rgba(74, 222, 128, 0.2)' : 'none',
+              textShadow: theme === 'dark' ? '0 0 10px rgba(96, 165, 250, 0.2)' : 'none',
             }}
           >
             {`"${getMonthYear(currentMonth)}"`}
@@ -92,37 +89,33 @@ export default function MonthNavigator() {
         </motion.div>
 
         {/* Today button */}
-        <motion.button
-          whileHover={{ scale: 1.2, rotate: 180 }}
-          whileTap={{ scale: 0.8 }}
+        <button
           onClick={handleToday}
           title="Go to today"
           className={cn(
-            'p-2 rounded-lg transition-all font-bold text-sm',
+            'p-2 rounded-lg transition-all font-bold text-sm hover:scale-110 active:scale-95',
             theme === 'dark'
-              ? 'hover:bg-purple-600/40 text-purple-400 hover:text-purple-300 border border-transparent hover:border-purple-500/40'
-              : 'hover:bg-purple-500/40 text-purple-600 hover:text-purple-700 border border-transparent hover:border-purple-500/40'
+              ? 'hover:bg-[#60A5FA]/40 text-[#60A5FA] hover:text-[#A78BFA] border border-transparent hover:border-[#60A5FA]/40'
+              : 'hover:bg-[#3B82F6]/40 text-[#3B82F6] hover:text-[#6366F1] border border-transparent hover:border-[#3B82F6]/40'
           )}
         >
           ↻
-        </motion.button>
+        </button>
       </div>
 
       {/* Next month button */}
-      <motion.button
-        whileHover={{ scale: 1.15, x: 2 }}
-        whileTap={{ scale: 0.85 }}
+      <button
         onClick={handleNextMonth}
         title="Next month (→ or swipe)"
         className={cn(
-          'p-2.5 rounded-lg transition-all font-bold text-lg',
+          'p-2.5 rounded-lg transition-all font-bold text-lg hover:scale-105 active:scale-95',
           theme === 'dark'
-            ? 'hover:bg-blue-600/40 text-blue-400 hover:text-blue-300 border border-transparent hover:border-blue-500/40'
-            : 'hover:bg-blue-500/40 text-blue-600 hover:text-blue-700 border border-transparent hover:border-blue-500/40'
+            ? 'hover:bg-[#60A5FA]/40 text-[#60A5FA] hover:text-[#A78BFA] border border-transparent hover:border-[#60A5FA]/40'
+            : 'hover:bg-[#3B82F6]/40 text-[#3B82F6] hover:text-[#6366F1] border border-transparent hover:border-[#3B82F6]/40'
         )}
       >
         &gt;
-      </motion.button>
+      </button>
     </motion.div>
   );
 }

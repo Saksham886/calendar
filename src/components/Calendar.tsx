@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useRef, useEffect, useMemo, useState } from 'react';
+import { useCallback, useRef, useEffect, useMemo } from 'react';
 import useCalendarStore from '@/store/calendarStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart3, TrendingUp } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { formatDateRange } from '@/utils/dateUtils';
 import MonthNavigator from './MonthNavigator';
@@ -23,18 +24,11 @@ export default function Calendar() {
     showHeatmap,
   } = useCalendarStore();
 
-  const [showCursor, setShowCursor] = useState(true);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const monthKey = currentMonth.toISOString(); // Track month changes for flip animation
 
-  // Blinking cursor effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 530);
-    return () => clearInterval(interval);
-  }, []);
+  // Blinking cursor effect is now CSS-based for performance
+  // Removed setInterval to prevent constant re-renders
 
   const daysSelected = useMemo(() => {
     if (!startDate || !endDate) return 0;
@@ -70,7 +64,7 @@ export default function Calendar() {
         transition={{ delay: 0.05 }}
         className={cn(
           'text-sm font-mono',
-          theme === 'dark' ? 'text-slate-500' : 'text-slate-600'
+          theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
         )}
       >
         {'// const calendar = new DeveloperCalendar()'}
@@ -85,8 +79,8 @@ export default function Calendar() {
           'rounded-3xl backdrop-blur-xl border shadow-2xl overflow-hidden',
           'relative group perspective',
           theme === 'dark'
-            ? 'bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/50 border-slate-700/60 shadow-slate-900/50'
-            : 'bg-gradient-to-br from-white/60 via-slate-50/50 to-white/40 border-slate-300/60 shadow-slate-300/30'
+            ? 'bg-gradient-to-br from-[#1E293B]/60 via-[#0F172A]/40 to-[#1E293B]/50 border-[#334155]/60 shadow-[#0F172A]/50'
+            : 'bg-gradient-to-br from-[#FFFFFF]/60 via-[#F8FAFC]/50 to-[#FFFFFF]/40 border-[#E2E8F0]/60 shadow-[#0F172A]/10'
         )}
       >
         {/* Premium glass gradient overlay */}
@@ -115,17 +109,15 @@ export default function Calendar() {
                   transition={{ delay: 0.15 }}
                   className={cn(
                     'text-3xl font-bold font-mono tracking-tight',
-                    theme === 'dark' ? 'text-green-400' : 'text-green-700'
+                    theme === 'dark' ? 'text-[#60A5FA]' : 'text-[#3B82F6]'
                   )}
-                  style={{ textShadow: theme === 'dark' ? '0 0 10px rgba(74, 222, 128, 0.3)' : 'none' }}
+                  style={{ textShadow: theme === 'dark' ? '0 0 10px rgba(96, 165, 250, 0.3)' : 'none' }}
                 >
                   {'// calendar.render()'}
-                  <motion.span
-                    animate={{ opacity: showCursor ? 1 : 0 }}
-                    transition={{ duration: 0.05 }}
+                  <span
                     className={cn(
-                      'inline-block ml-1 w-1 h-8 rounded-sm',
-                      theme === 'dark' ? 'bg-green-400' : 'bg-green-700'
+                      'inline-block ml-1 w-1 h-8 rounded-sm animate-blink',
+                      theme === 'dark' ? 'bg-[#60A5FA]' : 'bg-[#3B82F6]'
                     )}
                   />
                 </motion.h2>
@@ -136,8 +128,8 @@ export default function Calendar() {
                   className={cn(
                     'mt-2 inline-block px-4 py-2 rounded-lg backdrop-blur-sm font-mono text-xs tracking-wide',
                     theme === 'dark'
-                      ? 'bg-blue-500/20 border border-blue-500/40 text-blue-300'
-                      : 'bg-blue-400/20 border border-blue-400/40 text-blue-700'
+                      ? 'bg-[#60A5FA]/20 border border-[#60A5FA]/40 text-[#60A5FA]'
+                      : 'bg-[#3B82F6]/20 border border-[#3B82F6]/40 text-[#3B82F6]'
                   )}
                 >
                   <p className="font-medium">
@@ -146,38 +138,34 @@ export default function Calendar() {
                 </motion.div>
               </div>
               <div className="flex gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={toggleHeatmap}
                   title={showHeatmap ? 'Disable heatmap' : 'Enable heatmap'}
                   className={cn(
-                    'px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all',
+                    'px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all hover:scale-105 active:scale-95',
                     showHeatmap
                       ? theme === 'dark'
-                        ? 'bg-green-600/50 border border-green-500/60 text-green-300'
-                        : 'bg-green-500/40 border border-green-400/60 text-green-700'
+                        ? 'bg-[#60A5FA]/50 border border-[#60A5FA]/60 text-[#E2E8F0]'
+                        : 'bg-[#3B82F6]/40 border border-[#3B82F6]/60 text-[#0F172A]'
                       : theme === 'dark'
-                        ? 'bg-slate-700/40 border border-slate-600/40 text-slate-400'
-                        : 'bg-slate-300/40 border border-slate-200/40 text-slate-700',
-                    'hover:scale-105'
+                        ? 'bg-[#334155]/40 border border-[#334155]/40 text-[#94A3B8]'
+                        : 'bg-[#E2E8F0]/40 border border-[#E2E8F0]/40 text-[#0F172A]'
                   )}
                 >
                   {showHeatmap ? '📊 heatmap' : '📈 heatmap'}
-                </motion.button>
+                </button>
                 <ThemeToggle />
               </div>
             </div>
           </motion.div>
 
-          {/* Month Navigator with flip animation on month change */}
+          {/* Month Navigator with simple fade animation */}
           <motion.div
             key={monthKey}
-            initial={{ opacity: 0, rotateX: -90 }}
-            animate={{ opacity: 1, rotateX: 0 }}
-            exit={{ opacity: 0, rotateX: 90 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            style={{ perspective: '1000px' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="mb-8"
           >
             <MonthNavigator />
@@ -191,12 +179,12 @@ export default function Calendar() {
             className={cn(
               'mb-6 px-4 py-3 rounded-lg backdrop-blur-sm border text-xs font-mono leading-relaxed',
               theme === 'dark'
-                ? 'bg-slate-900/40 border-slate-700/40'
-                : 'bg-slate-100/40 border-slate-300/40'
+                ? 'bg-[#0F172A]/40 border-[#334155]/40'
+                : 'bg-[#F8FAFC]/40 border-[#E2E8F0]/40'
             )}
           >
-            <div className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
-              <div className={theme === 'dark' ? 'text-green-500' : 'text-green-700'}>
+            <div className={theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'}>
+              <div className={theme === 'dark' ? 'text-[#34D399]' : 'text-[#22C55E]'}>
                 {'> initializing calendar...'}
               </div>
               <div className="mt-1">
@@ -208,14 +196,13 @@ export default function Calendar() {
             </div>
           </motion.div>
 
-          {/* Calendar Grid with flip animation */}
+          {/* Calendar Grid with simple fade animation */}
           <motion.div
             key={`grid-${monthKey}`}
-            initial={{ opacity: 0, rotateX: -90 }}
-            animate={{ opacity: 1, rotateX: 0 }}
-            exit={{ opacity: 0, rotateX: 90 }}
-            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.05 }}
-            style={{ perspective: '1000px' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="mb-8"
           >
             <CalendarGrid />
@@ -238,7 +225,7 @@ export default function Calendar() {
             transition={{ delay: 0.3 }}
             className={cn(
               'pt-6 border-t',
-              theme === 'dark' ? 'border-slate-700/40' : 'border-slate-300/40'
+              theme === 'dark' ? 'border-[#334155]/40' : 'border-[#E2E8F0]/40'
             )}
           >
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -252,8 +239,8 @@ export default function Calendar() {
                     className={cn(
                       'flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-sm font-mono text-xs',
                       theme === 'dark'
-                        ? 'bg-green-600/30 border border-green-500/40 text-green-300'
-                        : 'bg-green-500/30 border border-green-400/40 text-green-700'
+                        ? 'bg-[#60A5FA]/30 border border-[#60A5FA]/40 text-[#60A5FA]'
+                        : 'bg-[#3B82F6]/30 border border-[#3B82F6]/40 text-[#3B82F6]'
                     )}
                   >
                     <span className="font-semibold">
@@ -268,7 +255,7 @@ export default function Calendar() {
                     exit={{ opacity: 0, x: -20 }}
                     className={cn(
                       'text-xs font-mono font-medium',
-                      theme === 'dark' ? 'text-slate-500' : 'text-slate-600'
+                      theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
                     )}
                   >
                     {'// select a date range'}
@@ -276,27 +263,20 @@ export default function Calendar() {
                 )}
               </AnimatePresence>
 
-              <AnimatePresence>
-                {startDate && endDate && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleResetSelection}
-                    className={cn(
-                      'px-4 py-2 rounded-lg font-medium text-xs font-mono transition-all',
-                      'hover:scale-105 active:scale-95',
-                      theme === 'dark'
-                        ? 'bg-red-600/60 hover:bg-red-600/80 border border-red-500/50 text-red-300 shadow-lg shadow-red-500/20'
-                        : 'bg-red-500/60 hover:bg-red-500/80 border border-red-400/50 text-red-700 shadow-lg shadow-red-400/20'
-                    )}
-                  >
-                    {'// clear()'}
-                  </motion.button>
-                )}
-              </AnimatePresence>
+              {startDate && endDate && (
+                <button
+                  onClick={handleResetSelection}
+                  className={cn(
+                    'px-4 py-2 rounded-lg font-medium text-xs font-mono transition-all',
+                    'hover:scale-105 active:scale-95',
+                    theme === 'dark'
+                      ? 'bg-[#60A5FA]/60 hover:bg-[#60A5FA]/80 border border-[#60A5FA]/50 text-[#E2E8F0] shadow-lg shadow-[#60A5FA]/20'
+                      : 'bg-[#3B82F6]/60 hover:bg-[#3B82F6]/80 border border-[#3B82F6]/50 text-[#FFFFFF] shadow-lg shadow-[#3B82F6]/20'
+                  )}
+                >
+                  {'// clear()'}
+                </button>
+              )}
             </div>
           </motion.div>
         </div>

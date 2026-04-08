@@ -24,8 +24,8 @@ export default function CalendarPage() {
       ref={containerRef}
       className={`min-h-screen transition-colors duration-500 ${
         theme === 'dark'
-          ? 'bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950'
-          : 'bg-gradient-to-br from-white via-blue-50 to-slate-100'
+          ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]'
+          : 'bg-gradient-to-br from-[#F8FAFC] via-[#FFFFFF] to-[#F8FAFC]'
       }`}
     >
       {/* Noise texture overlay for added depth */}
@@ -36,43 +36,27 @@ export default function CalendarPage() {
           backgroundSize: '400px 400px',
         }}
       />
-      {/* Animated background elements with enhanced choreography */}
+      {/* Static background elements - removed animations for performance */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Primary floating element */}
-        <motion.div
-          className={`absolute top-20 left-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-25 ${
-            theme === 'dark' ? 'bg-blue-600' : 'bg-blue-300'
+        {/* Primary static element */}
+        <div
+          className={`absolute top-20 left-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-15 ${
+            theme === 'dark' ? 'bg-[#60A5FA]' : 'bg-[#3B82F6]'
           }`}
-          animate={{
-            x: [0, 100, 0],
-            y: [0, 150, 0],
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        {/* Secondary floating element */}
-        <motion.div
-          className={`absolute bottom-40 right-20 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-25 ${
-            theme === 'dark' ? 'bg-indigo-600' : 'bg-indigo-300'
+        {/* Secondary static element */}
+        <div
+          className={`absolute bottom-40 right-20 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-15 ${
+            theme === 'dark' ? 'bg-[#A78BFA]' : 'bg-[#6366F1]'
           }`}
-          animate={{
-            x: [0, -100, 0],
-            y: [0, -150, 0],
-          }}
-          transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
         />
 
         {/* Tertiary accent element */}
-        <motion.div
-          className={`absolute top-1/2 left-1/2 w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-10 ${
-            theme === 'dark' ? 'bg-purple-600' : 'bg-purple-300'
+        <div
+          className={`absolute top-1/2 left-1/2 w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-5 ${
+            theme === 'dark' ? 'bg-[#34D399]' : 'bg-[#22C55E]'
           }`}
-          animate={{
-            x: [0, 60, 0],
-            y: [0, -80, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{ duration: 35, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
 
@@ -125,7 +109,7 @@ export default function CalendarPage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className={cn(
               'mt-16 text-center text-xs sm:text-sm font-medium py-4',
-              theme === 'dark' ? 'text-slate-500' : 'text-slate-600'
+              theme === 'dark' ? 'text-[#94A3B8]' : 'text-[#64748B]'
             )}
           >
             <p>💡 Click or drag to select dates • Use keyboard arrows to navigate months</p>
